@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>كيو | رادار الحساسية والنظام الغذائي</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef5f2;--panel:#fff;--ink:#0f2a24;--muted:#58706a;--line:#cfe0da;--pulse:#1c8f6e;--on:#fff;--coral:#d9482b;--coralbg:#fde8e2;--okbg:#dff3ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1c25;--panel:#11303c;--ink:#e8f3ef;--muted:#8fb0a8;--line:#1f4453;--pulse:#6fe3c2;--on:#06231b;--coral:#ff7a5c;--coralbg:#3b1d19;--okbg:#123a33}}
+:root[data-theme="dark"]{--bg:#0a1c25;--panel:#11303c;--ink:#e8f3ef;--muted:#8fb0a8;--line:#1f4453;--pulse:#6fe3c2;--on:#06231b;--coral:#ff7a5c;--coralbg:#3b1d19;--okbg:#123a33}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif;line-height:1.6}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 70px}
+h1{font-size:2rem;line-height:1.25;margin:0 0 8px;font-weight:700}
+.sub{color:var(--muted);margin:0 0 18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;transition:.2s}
+.chip[aria-pressed="true"],.chip[aria-selected="true"]{background:var(--pulse);color:var(--on);border-color:var(--pulse);font-weight:500}
+button:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.radar{position:relative;width:100%;max-width:400px;aspect-ratio:1;margin:22px auto 8px;border-radius:50%;background:radial-gradient(circle,var(--panel) 0,var(--bg) 100%);border:1.5px solid var(--line);overflow:visible}
+.ring{position:absolute;border:1px dashed var(--line);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+.cross{position:absolute;inset:0;border-radius:50%;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat,linear-gradient(var(--line),var(--line)) center/100% 1px no-repeat;opacity:.7}
+.sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 250deg,var(--pulse) 360deg);opacity:0;pointer-events:none}
+.sweep.go{animation:spin 1.1s linear 1,fade 1.1s linear 1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.core{position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px;border-radius:50%;background:var(--pulse);color:var(--on);display:grid;place-items:center;font-weight:700;box-shadow:0 0 0 6px var(--okbg)}
+.blip{position:absolute;width:38px;height:38px;margin:-19px;border-radius:50%;border:2.5px solid var(--pulse);background:var(--panel);font-size:1.15rem;cursor:pointer;padding:0;display:grid;place-items:center;transition:border-color .3s,background .3s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.blip.bad{border-color:var(--coral);background:var(--coralbg);animation:pop .5s}
+.blip.sel{box-shadow:0 0 0 4px var(--okbg),0 0 0 6px var(--pulse);z-index:2}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes fade{0%{opacity:0}15%{opacity:.5}85%{opacity:.5}100%{opacity:0}}
+.legend{text-align:center;color:var(--muted);font-size:.82rem;margin:0 0 4px}
+.score{text-align:center;margin:10px 0 18px}
+.score b{font-size:2.6rem;line-height:1;color:var(--pulse);display:block}
+.score span{color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.panel h2{font-size:1rem;margin:0 0 10px}
+.det{display:flex;gap:14px;align-items:flex-start}
+.det .em{font-size:2.6rem;line-height:1}
+.det h3{margin:0;font-size:1.1rem}
+.meta{color:var(--muted);font-size:.86rem}
+.badge{display:inline-block;font-size:.8rem;padding:2px 11px;border-radius:999px;background:var(--okbg);color:var(--pulse);margin-top:6px}
+.badge.bad{background:var(--coralbg);color:var(--coral)}
+.btn{font:inherit;background:var(--pulse);color:var(--on);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:700;margin-top:10px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+.demo{display:block;width:100%;margin-top:14px;background:var(--ink);color:var(--bg)}
+.sum{display:flex;justify-content:space-between;gap:10px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--pulse);width:0;transition:width .4s}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
+.x{font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.2rem}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.overlay.on{display:flex}
+.modal{background:var(--panel);border-radius:18px;max-width:420px;width:100%;padding:20px;border-top:6px solid var(--coral);animation:in .3s}
+@keyframes in{from{transform:translateY(24px) scale(.96);opacity:0}}
+.modal h2{margin:0 0 6px;font-size:1.15rem;color:var(--coral)}
+.modal ul{margin:8px 0;padding-inline-start:20px}
+.alt{background:var(--okbg);border-radius:12px;padding:12px;margin:10px 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;display:none;z-index:30}
+.toast.on{display:block}
+.note{color:var(--muted);font-size:.82rem;margin-top:22px}
+@media (prefers-reduced-motion:reduce){.sweep,.blip.bad,.blip.bad::after,.modal{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>كيو يفحص وجباتك قبل أن تصلك</h1>
+<p class="sub">فعّل ملفك الصحي وشاهد الرادار يكشف الوجبات التي لا تناسبك.</p>
+<div class="chips" id="chips"></div>
+
+<div class="radar" id="radar">
+<div class="ring" style="width:28%;height:28%"></div><div class="ring" style="width:52%;height:52%"></div><div class="ring" style="width:76%;height:76%"></div><div class="ring" style="width:94%;height:94%"></div>
+<div class="cross"></div><div class="sweep"></div><div class="core">Q</div>
+</div>
+<p class="legend">من الداخل للخارج: فطور، غداء، عشاء، سناك</p>
+<div class="score" id="score"></div>
+
+<div class="panel" id="det"></div>
+<button class="btn demo" id="demo">شغّل العرض التلقائي</button>
+
+<div class="panel"><h2>باقتك الشهرية</h2><div class="chips" id="tiers"></div></div>
+<div class="panel" id="plan"></div>
+<p class="note">نموذج توضيحي ببيانات وهمية. في النظام الحقيقي تُربط الوصفات بالمطبخ المركزي ويراجعها مختص تغذية وجهة قانونية، لأن أي خطأ في الحساسية خطير.</p>
+</div>
+
+<div class="overlay" id="ov" role="dialog" aria-modal="true" aria-labelledby="mt">
+<div class="modal"><h2 id="mt">تنبيه صحي</h2><div id="mb"></div><div class="acts" id="ma"></div></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var MEALS=[
+{id:1,cat:"فطور",em:"🍳",name:"أومليت بالسبانخ والجبن",kcal:280,pro:20,sugar:2,gluten:false,nuts:false,milk:true,ing:"بيض، سبانخ، جبن موزاريلا"},
+{id:2,cat:"فطور",em:"🥣",name:"شوفان بالموز والجوز",kcal:340,pro:11,sugar:10,gluten:true,nuts:true,milk:false,ing:"شوفان، موز، جوز، عسل"},
+{id:3,cat:"فطور",em:"🥥",name:"بودينغ الشيا بجوز الهند",kcal:260,pro:8,sugar:4,gluten:false,nuts:false,milk:false,ing:"بذور الشيا، حليب جوز الهند، توت"},
+{id:4,cat:"فطور",em:"🥑",name:"توست أفوكادو",kcal:310,pro:9,sugar:3,gluten:true,nuts:false,milk:false,ing:"خبز قمح كامل، أفوكادو، ليمون"},
+{id:5,cat:"غداء",em:"🍗",name:"دجاج مشوي مع أرز بني",kcal:450,pro:38,sugar:3,gluten:false,nuts:false,milk:false,ing:"صدر دجاج، أرز بني، بروكلي"},
+{id:6,cat:"غداء",em:"🍝",name:"باستا بالبيستو والكاجو",kcal:520,pro:18,sugar:4,gluten:true,nuts:true,milk:true,ing:"باستا قمح، ريحان، كاجو، جبن"},
+{id:7,cat:"غداء",em:"🐟",name:"سلطة كينوا بالسلمون",kcal:420,pro:32,sugar:4,gluten:false,nuts:false,milk:false,ing:"كينوا، سلمون، خيار، زيت زيتون"},
+{id:8,cat:"غداء",em:"🍔",name:"برغر لحم بصوص باربكيو",kcal:560,pro:35,sugar:16,gluten:true,nuts:false,milk:false,ing:"لحم بقر، خبز برغر، صوص باربكيو"},
+{id:9,cat:"عشاء",em:"🍲",name:"شوربة عدس وخضار",kcal:280,pro:14,sugar:5,gluten:false,nuts:false,milk:false,ing:"عدس، جزر، كرفس، كمون"},
+{id:10,cat:"عشاء",em:"🧀",name:"لازانيا الخضار",kcal:480,pro:22,sugar:7,gluten:true,nuts:false,milk:true,ing:"شرائح لازانيا، كوسا، بشاميل، جبن"},
+{id:11,cat:"عشاء",em:"🐠",name:"سمك مشوي مع خضار",kcal:380,pro:34,sugar:2,gluten:false,nuts:false,milk:false,ing:"فيليه سمك، كوسا، فلفل، ليمون"},
+{id:12,cat:"عشاء",em:"🍛",name:"كاري دجاج بحليب جوز الهند",kcal:430,pro:30,sugar:6,gluten:false,nuts:false,milk:false,ing:"دجاج، كاري، حليب جوز الهند، أرز"},
+{id:13,cat:"سناك",em:"🫐",name:"زبادي يوناني بالتوت",kcal:150,pro:12,sugar:9,gluten:false,nuts:false,milk:true,ing:"زبادي يوناني، توت أزرق، قرفة"},
+{id:14,cat:"سناك",em:"🌰",name:"كرات الطاقة بالتمر واللوز",kcal:190,pro:6,sugar:14,gluten:false,nuts:true,milk:false,ing:"تمر، لوز، جوز هند، كاكاو"},
+{id:15,cat:"سناك",em:"🥕",name:"حمص مع شرائح خضار",kcal:160,pro:7,sugar:3,gluten:false,nuts:false,milk:false,ing:"حمص، طحينة، جزر، خيار"},
+{id:16,cat:"سناك",em:"🍪",name:"بسكويت شوفان بالتمر",kcal:170,pro:4,sugar:8,gluten:true,nuts:false,milk:false,ing:"شوفان، تمر، زيت جوز الهند"}
+];
+var LABELS={gluten:"حساسية الجلوتين",nuts:"حساسية المكسرات",milk:"حساسية الحليب",sugar:"نظام خافض للسكر"};
+var TIERS=[{n:12,p:38},{n:20,p:35},{n:30,p:32}];
+var RING={"فطور":[14,20],"غداء":[26,65],"عشاء":[38,110],"سناك":[47,155]};
+var profile={gluten:false,nuts:false,milk:false,sugar:false};
+var tier=TIERS[1],plan=[],sel=1,blips={};
+var $=function(i){return document.getElementById(i)};
+function find(id){return MEALS.filter(function(m){return m.id===id})[0]}
+function issues(m){
+var r=[];
+if(profile.gluten&&m.gluten)r.push("تحتوي على الجلوتين");
+if(profile.nuts&&m.nuts)r.push("تحتوي على المكسرات");
+if(profile.milk&&m.milk)r.push("تحتوي على الحليب أو مشتقاته");
+if(profile.sugar&&m.sugar>8)r.push("نسبة السكر "+m.sugar+" جم، أعلى من حدك للوجبة");
+return r;
+}
+function alternative(m){
+return MEALS.filter(function(x){return x.cat===m.cat&&x.id!==m.id&&issues(x).length===0})
+.sort(function(a,b){return Math.abs(a.kcal-m.kcal)-Math.abs(b.kcal-m.kcal)})[0];
+}
+function angleOf(m){var i=MEALS.filter(function(x){return x.cat===m.cat}).indexOf(m);return (RING[m.cat][1]+i*90)%360}
+function buildBlips(){
+MEALS.forEach(function(m){
+var a=angleOf(m)*Math.PI/180,r=RING[m.cat][0];
+var b=document.createElement("button");b.className="blip";b.textContent=m.em;
+b.style.left=(50+r*Math.sin(a))+"%";b.style.top=(50-r*Math.cos(a))+"%";
+b.setAttribute("aria-label",m.name);
+b.onclick=function(){stopDemo();sel=m.id;paint();renderDet()};
+$("radar").appendChild(b);blips[m.id]=b;
+});
+}
+function paint(){
+MEALS.forEach(function(m){var b=blips[m.id];b.classList.toggle("sel",m.id===sel)});
+}
+var timers=[];
+function scan(){
+var sw=$("radar").querySelector(".sweep");sw.classList.remove("go");void sw.offsetWidth;sw.classList.add("go");
+var good=0;
+timers.forEach(clearTimeout);timers=[];
+MEALS.forEach(function(m){
+var bad=issues(m).length>0;if(!bad)good++;
+var b=blips[m.id];
+if(b.classList.contains("bad")===bad)return;
+timers.push(setTimeout(function(){b.classList.toggle("bad",bad)},angleOf(m)/360*1100));
+});
+var any=profile.gluten||profile.nuts||profile.milk||profile.sugar;
+$("score").innerHTML=any?'<b>'+good+' من '+MEALS.length+'</b><span>وجبة تناسب ملفك الصحي</span>':'<span>اختر ملفك الصحي ليبدأ الفحص</span>';
+}
+function renderChips(){
+$("chips").innerHTML="";
+Object.keys(LABELS).forEach(function(k){
+var b=document.createElement("button");b.className="chip";b.textContent=LABELS[k];
+b.setAttribute("aria-pressed",profile[k]);
+b.onclick=function(){stopDemo();setProfile(k,!profile[k])};
+$("chips").appendChild(b);
+});
+}
+function setProfile(k,v){profile[k]=v;renderChips();scan();renderDet();renderPlan()}
+function renderDet(){
+var m=find(sel),is=issues(m),any=profile.gluten||profile.nuts||profile.milk||profile.sugar;
+var h='<div class="det"><div class="em">'+m.em+'</div><div><h3>'+m.name+'</h3><div class="meta">'+m.ing+'</div><div class="meta">'+m.kcal+' سعرة، '+m.pro+' جم بروتين، '+m.sugar+' جم سكر</div>'+
+(any?'<span class="badge'+(is.length?' bad">تعارض مع ملفك':'">تناسبك')+'</span>':'')+'</div></div>';
+$("det").innerHTML=h;
+var b=document.createElement("button");b.className="btn";b.textContent="أضف لخطتي";
+b.onclick=function(){tryAdd(m)};$("det").appendChild(b);
+}
+function renderTiers(){
+$("tiers").innerHTML="";
+TIERS.forEach(function(t){
+var b=document.createElement("button");b.className="chip";
+b.textContent=t.n+" وجبة، "+t.p+" ر.س للوجبة";
+b.setAttribute("aria-selected",t===tier);
+b.onclick=function(){tier=t;renderTiers();renderPlan()};
+$("tiers").appendChild(b);
+});
+}
+function renderPlan(){
+var p=$("plan"),kc=0,pr=0;
+plan.forEach(function(id){var m=find(id);kc+=m.kcal;pr+=m.pro});
+var h='<div class="sum"><h2 style="margin:0">خطتك لهذا الشهر</h2><strong>'+plan.length+' من '+tier.n+'</strong></div><div class="bar"><i style="width:'+Math.min(100,plan.length/tier.n*100)+'%"></i></div>';
+h+='<div class="meta">الإجمالي الشهري: '+(tier.n*tier.p)+' ر.س'+(plan.length?'، متوسط الوجبة '+Math.round(kc/plan.length)+' سعرة و'+Math.round(pr/plan.length)+' جم بروتين':'')+'</div>';
+if(!plan.length)h+='<p class="meta">اضغط على أي وجبة في الرادار، ثم أضفها لخطتك.</p>';
+p.innerHTML=h;
+plan.forEach(function(id,i){
+var m=find(id),d=document.createElement("div");d.className="item";
+d.innerHTML='<span>'+m.em+' '+m.name+(issues(m).length?' <span class="badge bad">تعارض مع ملفك</span>':'')+'</span>';
+var x=document.createElement("button");x.className="x";x.setAttribute("aria-label","إزالة");x.textContent="×";
+x.onclick=function(){plan.splice(i,1);renderPlan()};
+d.appendChild(x);p.appendChild(d);
+});
+}
+function addMeal(m){
+if(plan.length>=tier.n){toast("اكتملت خطتك. غيّر الباقة لإضافة المزيد");return}
+plan.push(m.id);renderPlan();toast("أضفنا "+m.name+" لخطتك");
+}
+function tryAdd(m){
+var is=issues(m);
+if(!is.length){addMeal(m);return}
+var alt=alternative(m);
+var h='<p>هذه الوجبة لا تناسب ملفك الصحي:</p><ul>'+is.map(function(i){return'<li>'+i+'</li>'}).join("")+'</ul>';
+if(alt)h+='<p>هل تفضّل وجبة بديلة متوافقة وبقيمة غذائية قريبة؟</p>';
+$("mb").innerHTML=h;$("ma").innerHTML="";
+if(alt){var s=document.createElement("button");s.className="btn";s.textContent="عرض البديل";s.onclick=function(){showAlt(alt)};$("ma").appendChild(s)}
+var c=document.createElement("button");c.className="btn ghost";c.textContent="إغلاق";c.onclick=close;$("ma").appendChild(c);
+$("ov").classList.add("on");
+}
+function showAlt(alt){
+$("mt").textContent="بديل مناسب لك";
+$("mb").innerHTML='<div class="alt"><div style="font-size:2rem">'+alt.em+'</div><strong>'+alt.name+'</strong><div class="meta">'+alt.ing+'</div><div class="meta">'+alt.kcal+' سعرة، '+alt.pro+' جم بروتين</div></div><p class="meta">متوافقة مع ملفك ومن الفئة نفسها.</p>';
+$("ma").innerHTML="";
+var a=document.createElement("button");a.className="btn";a.textContent="أضف البديل لخطتي";
+a.onclick=function(){addMeal(alt);sel=alt.id;paint();renderDet();close()};
+var c=document.createElement("button");c.className="btn ghost";c.textContent="إغلاق";c.onclick=close;
+$("ma").appendChild(a);$("ma").appendChild(c);
+}
+function close(){$("ov").classList.remove("on");$("mt").textContent="تنبيه صحي"}
+$("ov").onclick=function(e){if(e.target===$("ov"))close()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+var tt;
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},2200)}
+var dt=[];
+function stopDemo(){dt.forEach(clearTimeout);dt=[]}
+$("demo").onclick=function(){
+stopDemo();close();plan=[];Object.keys(profile).forEach(function(k){profile[k]=false});sel=6;
+renderChips();scan();paint();renderDet();renderPlan();
+dt.push(setTimeout(function(){setProfile("gluten",true)},900));
+dt.push(setTimeout(function(){setProfile("milk",true)},2800));
+dt.push(setTimeout(function(){tryAdd(find(6))},4800));
+};
+buildBlips();renderChips();renderTiers();scan();paint();renderDet();renderPlan();
+</script>
+</body>
+</html>
